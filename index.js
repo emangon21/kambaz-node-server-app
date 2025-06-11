@@ -19,11 +19,23 @@ console.log("Loaded ENV:", process.env.NETLIFY_URL, process.env.SESSION_SECRET);
 const app = express();
 const PORT = process.env.PORT || 4000;
 
+const allowedOrigins = [
+    "http://localhost:5173",
+    "https://kambaz-app.netlify.app",
+];
 
 app.use(cors({
-    origin: 'http://localhost:5173',
-    credentials: true
+    origin: function(origin, callback) {
+        if (!origin) return callback(null, true);
+        if (allowedOrigins.includes(origin)) {
+            return callback(null, true);
+        } else {
+            return callback(new Error("Not allowed by CORS"), false);
+        }
+    },
+    credentials: true,
 }));
+
 app.use(express.json());
 
 
@@ -33,8 +45,7 @@ app.use(session({
     saveUninitialized: false,
     cookie: {
         sameSite: 'none',
-        secure: false
-
+        secure: true,
     }
 }));
 
