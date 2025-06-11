@@ -1,6 +1,5 @@
+// src/Kambaz/Users/routes.js
 import * as dao from './dao.js';
-import * as courseDao from "../Courses/dao.js";
-import * as enrollmentsDao from "../Enrollments/dao.js";
 
 export default function UserRoutes(app) {
     // Sign up
@@ -62,17 +61,4 @@ export default function UserRoutes(app) {
             res.sendStatus(200);
         });
     });
-
-    const createCourse = (req, res) => {
-        const currentUser = req.session["currentUser"];
-        if (!currentUser) {
-            return res.status(401).json({ message: "Not logged in" });
-        }
-        const newCourse = courseDao.createCourse(req.body);
-        enrollmentsDao.enrollUserInCourse(currentUser._id, newCourse._id);
-        res.json(newCourse);
-    };
-    app.post("/api/users/current/courses", createCourse);
-
-
 }
