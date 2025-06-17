@@ -1,29 +1,23 @@
-import Database from "../Database/index.js";
-import { v4 as uuidv4 } from "uuid";
+// Kambaz/Modules/dao.js
+import ModuleModel from "./model.js";
 
-
-export function findModulesForCourse(courseId) {
-    const { modules } = Database;
-    return modules.filter((module) => module.course === courseId);
+export async function findModulesForCourse(courseId) {
+    return await ModuleModel.find({ course: courseId });
 }
 
-export function createModule(module) {
-    const newModule = { ...module, _id: uuidv4() };
-    Database.modules = [...Database.modules, newModule];
-    return newModule;
+export async function createModule(module) {
+    return await ModuleModel.create(module);
 }
 
-export function deleteModule(moduleId) {
-    const { modules } = Database;
-    Database.modules = modules.filter((module) => module._id !== moduleId);
+export async function deleteModule(moduleId) {
+    await ModuleModel.deleteOne({ _id: moduleId });
     return { status: "ok" };
 }
 
-export function updateModule(moduleId, moduleUpdates) {
-    const { modules } = Database;
-    const module = modules.find((m) => m._id === moduleId);
-    if (module) {
-        Object.assign(module, moduleUpdates);
-    }
-    return module;
+export async function updateModule(moduleId, moduleUpdates) {
+    return ModuleModel.findByIdAndUpdate(
+        moduleId,
+        moduleUpdates,
+        {new: true}
+    );
 }

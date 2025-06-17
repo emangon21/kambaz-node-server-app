@@ -1,30 +1,19 @@
-import { v4 as uuidv4 } from "uuid";
-import Database from "../Database/index.js";
+// Kambaz/Courses/dao.js
+import CourseModel from "./model.js";
 
-export function createCourse(course) {
-    const newCourse = { ...course, _id: uuidv4() };
-    Database.courses = [...Database.courses, newCourse];
+export const createCourse = async (course) => {
+    const newCourse = await CourseModel.create(course);
     return newCourse;
-}
+};
 
-export function findAllCourses() {
-    return Database.courses;
-}
+export const findAllCourses = async () => {
+    return await CourseModel.find();
+};
 
-export function deleteCourse(courseId) {
-    const { courses, enrollments } = Database;
-    Database.courses = courses.filter((course) => course._id !== courseId);
-    Database.enrollments = enrollments.filter(
-        (enrollment) => enrollment.course !== courseId
-    );
-    return { status: "ok" };
-}
+export const updateCourse = async (courseId, courseUpdates) => {
+    return await CourseModel.findByIdAndUpdate(courseId, courseUpdates, { new: true });
+};
 
-export function updateCourse(courseId, courseUpdates) {
-    const { courses } = Database;
-    const course = courses.find((c) => c._id === courseId);
-    if (course) {
-        Object.assign(course, courseUpdates);
-    }
-    return course;
-}
+export const deleteCourse = async (courseId) => {
+    return await CourseModel.findByIdAndDelete(courseId);
+};

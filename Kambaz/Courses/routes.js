@@ -1,44 +1,46 @@
 // Kambaz/Courses/routes.js
-import * as dao from './dao.js';
+import * as dao from "./dao.js";
 import * as modulesDao from "../Modules/dao.js";
 
 export default function CourseRoutes(app) {
+    // ——— Courses CRUD ———
+
     // Get all courses
-    app.get('/api/courses', async (req, res) => {
+    app.get("/api/courses", async (req, res) => {
         const courses = await dao.findAllCourses();
         res.json(courses);
     });
 
     // Create a course
-    app.post('/api/courses', async (req, res) => {
+    app.post("/api/courses", async (req, res) => {
         const newCourse = await dao.createCourse(req.body);
         res.json(newCourse);
     });
 
     // Update a course
-    app.put('/api/courses/:id', async (req, res) => {
+    app.put("/api/courses/:id", async (req, res) => {
         const updated = await dao.updateCourse(req.params.id, req.body);
         res.json(updated);
     });
 
     // Delete a course
-    app.delete('/api/courses/:id', async (req, res) => {
+    app.delete("/api/courses/:id", async (req, res) => {
         const result = await dao.deleteCourse(req.params.id);
         res.json(result);
     });
 
-    // Get modules for a specific course
-    app.get('/api/courses/:courseId/modules', (req, res) => {
+    // Retrieve modules for a given course
+    app.get("/api/courses/:courseId/modules", async (req, res) => {
         const { courseId } = req.params;
-        const modules = modulesDao.findModulesForCourse(courseId);
-        res.json(modules);
+        const mods = await modulesDao.findModulesForCourse(courseId);
+        res.json(mods);
     });
 
-    app.post('/api/courses/:courseId/modules', (req, res) => {
+    // Create a new module under a given course
+    app.post("/api/courses/:courseId/modules", async (req, res) => {
         const { courseId } = req.params;
-        const module = { ...req.body, course: courseId };
-        const newModule = modulesDao.createModule(module);
+        const moduleData = { ...req.body, course: courseId };
+        const newModule = await modulesDao.createModule(moduleData);
         res.json(newModule);
     });
-
 }
