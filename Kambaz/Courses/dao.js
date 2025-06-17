@@ -1,19 +1,24 @@
 // Kambaz/Courses/dao.js
 import CourseModel from "./model.js";
 
-export const createCourse = async (course) => {
-    const newCourse = await CourseModel.create(course);
-    return newCourse;
-};
+export async function findAllCourses() {
+    return CourseModel.find();
+}
 
-export const findAllCourses = async () => {
-    return await CourseModel.find();
-};
+export async function createCourse(course) {
+    const { _id, ...payload } = course;
+    return CourseModel.create(payload);
+}
 
-export const updateCourse = async (courseId, courseUpdates) => {
-    return await CourseModel.findByIdAndUpdate(courseId, courseUpdates, { new: true });
-};
+export async function updateCourse(courseId, courseUpdates) {
+    return CourseModel.findByIdAndUpdate(
+        courseId,
+        courseUpdates,
+        { new: true }
+    );
+}
 
-export const deleteCourse = async (courseId) => {
-    return await CourseModel.findByIdAndDelete(courseId);
-};
+export async function deleteCourse(courseId) {
+    await CourseModel.deleteOne({ _id: courseId });
+    return { status: "ok" };
+}

@@ -4,4 +4,4 @@ import courseSchema from "./schema.js";
 
 const CourseModel = mongoose.model("Course", courseSchema);
 
-export default CourseModel;
+export default mongoose.model("CourseModel", courseSchema);
