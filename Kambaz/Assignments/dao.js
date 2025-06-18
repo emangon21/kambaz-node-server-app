@@ -1,51 +1,36 @@
-// Kambaz/Assignments/dao.js
-import Database from "../Database/index.js";
+// File: Kambaz/Assignments/dao.js
+import model from "./model.js";
 
-function getNextAssignmentIdForCourse(courseId) {
-    const { assignments } = Database;
-    const courseAssignments = assignments.filter(a => a.course === courseId);
-    const lastNumber = courseAssignments
-        .map(a => {
-            const match = (a._id || "").match(/^A(\d+)/);
-            return match ? parseInt(match[1], 10) : 0;
-        })
-        .reduce((max, n) => Math.max(max, n), 100); // default start at 100
-    return `A${lastNumber + 1}`;
+// Generate a new assignment ID for a course (A101, A102…)
+async function getNextId(courseId) {
+    const docs = await model.find({ course: courseId }).select("_id").lean();
+    const nums = docs
+        .map((d) => (d._id.match(/^A(\d+)$/) || [])[1])
+        .map((n) => parseInt(n, 10) || 0);
+    const maxNum = nums.length ? Math.max(...nums) : 100;
+    return `A${maxNum + 1}`;
 }
 
-// Create an assignment
-export function createAssignment(assignment) {
-    let newId = assignment._id;
-    if (!newId || newId.startsWith("dbcf")) { // fallback: only if ID is not valid
-        newId = getNextAssignmentIdForCourse(assignment.course);
-    }
-    const newAssignment = { ...assignment, _id: newId };
-    Database.assignments = [...Database.assignments, newAssignment];
-    return newAssignment;
+export async function findAssignmentsForCourse(courseId) {
+    return model.find({ course: courseId }).lean();
 }
 
-// Get all assignments for a course
-export function findAssignmentsForCourse(courseId) {
-    const { assignments } = Database;
-    return assignments.filter((a) => a.course === courseId);
+export async function findAssignmentById(assignmentId) {
+    return model.findById(assignmentId).lean();
 }
 
-// Update an assignment
-export function updateAssignment(assignmentId, assignmentUpdates) {
-    const { assignments } = Database;
-    const assignment = assignments.find((a) => a._id === assignmentId);
-    if (assignment) Object.assign(assignment, assignmentUpdates);
-    return assignment;
+export async function createAssignmentForCourse(courseId, assignment) {
+    const id = assignment._id || (await getNextId(courseId));
+    const doc = { ...assignment, _id: id, course: courseId };
+    return model.create(doc);
 }
 
-// Delete an assignment
-export function deleteAssignment(assignmentId) {
-    const { assignments } = Database;
-    Database.assignments = assignments.filter((a) => a._id !== assignmentId);
-    return { status: "ok" };
+export async function updateAssignment(assignmentId, updates) {
+    return model
+        .findByIdAndUpdate(assignmentId, updates, { new: true })
+        .lean();
 }
 
-// Find one assignment by ID (optional, for editor)
-export function findAssignmentById(assignmentId) {
-    return Database.assignments.find((a) => a._id === assignmentId);
+export async function deleteAssignment(assignmentId) {
+    return model.deleteOne({ _id: assignmentId });
 }

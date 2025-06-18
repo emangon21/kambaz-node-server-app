@@ -1,5 +1,6 @@
-// src/Kambaz/Users/routes.js
+// File: Kambaz/Users/routes.js
 import * as dao from "./dao.js";
+import * as enrollmentsDao from "../Enrollments/dao.js";
 
 export default function UserRoutes(app) {
     // Sign up
@@ -26,9 +27,7 @@ export default function UserRoutes(app) {
                 req.body.password
             );
             if (!userDoc) {
-                return res
-                    .status(401)
-                    .json({ message: "Unable to login. Try again." });
+                return res.status(401).json({ message: "Unable to login. Try again." });
             }
             const user = userDoc.toObject({ versionKey: false });
             req.session.currentUser = user;
@@ -107,7 +106,6 @@ export default function UserRoutes(app) {
         }
     });
 
-
     // Update arbitrary user (admin-style)
     app.put("/api/users/:userId", async (req, res) => {
         try {
@@ -142,4 +140,42 @@ export default function UserRoutes(app) {
             res.sendStatus(200);
         });
     });
+
+
+
+    const findCoursesForUser = async (req, res) => {
+        let { uid } = req.params;
+        if (uid === "current") {
+            const curr = req.session.currentUser;
+            if (!curr) return res.sendStatus(401);
+            uid = curr._id;
+        }
+        const courses = await enrollmentsDao.findCoursesForUser(uid);
+        res.json(courses);
+    };
+    app.get("/api/users/:uid/courses", findCoursesForUser);
+
+    const enrollUserInCourse = async (req, res) => {
+        let { uid, cid } = req.params;
+        if (uid === "current") {
+            const curr = req.session.currentUser;
+            if (!curr) return res.sendStatus(401);
+            uid = curr._id;
+        }
+        await enrollmentsDao.enrollUserInCourse(uid, cid);
+        res.sendStatus(200);
+    };
+    app.post("/api/users/:uid/courses/:cid", enrollUserInCourse);
+
+    const unenrollUserFromCourse = async (req, res) => {
+        let { uid, cid } = req.params;
+        if (uid === "current") {
+            const curr = req.session.currentUser;
+            if (!curr) return res.sendStatus(401);
+            uid = curr._id;
+        }
+        await enrollmentsDao.unenrollUserFromCourse(uid, cid);
+        res.sendStatus(200);
+    };
+    app.delete("/api/users/:uid/courses/:cid", unenrollUserFromCourse);
 }

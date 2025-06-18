@@ -1,4 +1,4 @@
-// Kambaz/Users/schema.js
+// Kambaz/Users/schema.js.js
 import mongoose from "mongoose";
 
 const UserSchema = new mongoose.Schema(

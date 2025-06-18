@@ -1,19 +1,23 @@
-// Kambaz/Courses/routes.js
+// File: Kambaz/Courses/routes.js
 import * as dao from "./dao.js";
 import * as modulesDao from "../Modules/dao.js";
+import * as enrollmentsDao from "../Enrollments/dao.js";
 
 export default function CourseRoutes(app) {
-    // ——— Courses CRUD ———
-
     // Get all courses
     app.get("/api/courses", async (req, res) => {
         const courses = await dao.findAllCourses();
         res.json(courses);
     });
 
-    // Create a course
+    // Create a course AND auto-enroll the creator
     app.post("/api/courses", async (req, res) => {
         const newCourse = await dao.createCourse(req.body);
+        const curr = req.session.currentUser;
+        if (curr && curr._id) {
+            // auto-enroll the author in their new course
+            await enrollmentsDao.enrollUserInCourse(curr._id, newCourse._id);
+        }
         res.json(newCourse);
     });
 
@@ -43,4 +47,12 @@ export default function CourseRoutes(app) {
         const newModule = await modulesDao.createModule(moduleData);
         res.json(newModule);
     });
+
+    const findUsersForCourse = async (req, res) => {
+        const { cid } = req.params;
+        const users = await enrollmentsDao.findUsersForCourse(cid);
+        res.json(users);
+    };
+    app.get("/api/courses/:cid/users", findUsersForCourse);
+
 }
