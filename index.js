@@ -1,4 +1,3 @@
-// File: index.js
 import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
@@ -19,15 +18,13 @@ import EnrollmentRoutes from './Kambaz/Enrollments/routes.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+const CONNECTION_STRING = process.env.MONGO_CONNECTION_STRING;
 mongoose
-    .connect(process.env.MONGO_CONNECTION_STRING)
+    .connect(CONNECTION_STRING)
     .then(() => console.log('Connected to MongoDB Atlas'))
     .catch((err) => console.error('MongoDB connection error:', err));
 
-// ————— Remove any reference to NETLIFY_URL —————
-
-// Only log the session secret (or nothing):
-console.log('Loaded session SECRET');
+console.log('Loaded session SECRET'); // don’t reference NETLIFY_URL here
 
 const app = express();
 app.set('trust proxy', 1);
@@ -36,7 +33,12 @@ const allowedOrigins = [
     'http://localhost:5173',
     'https://kambaz-app.netlify.app'
 ];
-app.use(cors({ origin: allowedOrigins, credentials: true }));
+app.use(
+    cors({
+        origin: allowedOrigins,
+        credentials: true,
+    })
+);
 app.use(express.json());
 app.use(
     session({
@@ -50,6 +52,7 @@ app.use(
     })
 );
 
+// your API routes
 UserRoutes(app);
 Lab5(app);
 Hello(app);
@@ -60,10 +63,12 @@ EnrollmentRoutes(app);
 
 app.get('/api/db', (req, res) => res.json(db));
 
+// serve your React build
 app.use(express.static(path.join(__dirname, 'dist')));
-app.get('*', (req, res) =>
-    res.sendFile(path.join(__dirname, 'dist', 'index.html'))
-);
+
+app.use((req, res) => {
+    res.sendFile(path.join(__dirname, 'dist', 'index.html'));
+});
 
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => {
