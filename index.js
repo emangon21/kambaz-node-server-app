@@ -24,7 +24,7 @@ mongoose
     .then(() => console.log('Connected to MongoDB Atlas'))
     .catch((err) => console.error('MongoDB connection error:', err));
 
-console.log('Loaded session SECRET'); // don’t reference NETLIFY_URL here
+console.log('Loaded session SECRET');
 
 const app = express();
 app.set('trust proxy', 1);
@@ -46,8 +46,9 @@ app.use(
         resave: false,
         saveUninitialized: false,
         cookie: {
-            sameSite: 'none',
             secure: process.env.NODE_ENV === 'production',
+            sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+            httpOnly: true,
         },
     })
 );
