@@ -25,11 +25,11 @@ export default function EnrollmentRoutes(app) {
     });
 
     app.delete("/api/enrollments", async (req, res) => {
-        console.log("DELETE /api/enrollments BODY:", req.body);  // <--- Add this!
         const { userId, courseId } = req.body;
+        console.log("DELETE called with", userId, courseId);
         try {
-            await dao.unenrollUserFromCourse(userId, courseId);
-            res.json({ status: "ok" });
+            const result = await dao.unenrollUserFromCourse(userId, courseId);
+            res.json({ status: "ok", deleted: result.deletedCount });
         } catch (err) {
             res.status(500).json({ message: err.message });
         }

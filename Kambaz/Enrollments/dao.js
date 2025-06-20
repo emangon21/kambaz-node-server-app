@@ -28,10 +28,10 @@ export function enrollUserInCourse(userId, courseId) {
 
 
 
-export function unenrollUserFromCourse(userId, courseId) {
-    console.log("Unenrolling user:", userId, "from course:", courseId);
-    return model.deleteOne({
-        user: new mongoose.Types.ObjectId(userId),
-        course: new mongoose.Types.ObjectId(courseId),
-    });
+export async function unenrollUserFromCourse(userId, courseId) {
+    const userObjId = new mongoose.Types.ObjectId(userId);
+    const courseObjId = new mongoose.Types.ObjectId(courseId);
+    const res = await model.deleteOne({ user: userObjId, course: courseObjId });
+    console.log("Unenroll result:", res);
+    return res;
 }
