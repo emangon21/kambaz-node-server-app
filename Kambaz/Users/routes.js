@@ -12,8 +12,14 @@ export default function UserRoutes(app) {
             }
             const newUserDoc = await dao.createUser(req.body);
             const newUser = newUserDoc.toObject({ versionKey: false });
+            // ensure we carry string _id
+            newUser._id = newUserDoc._id.toString();
             req.session.currentUser = newUser;
-            res.json(newUser);
+            // force save so cookie+session is persisted
+            req.session.save(err => {
+                if (err) return res.status(500).json({ message: err.message });
+                res.json(newUser);
+            });
         } catch (err) {
             res.status(500).json({ message: err.message });
         }
@@ -27,11 +33,17 @@ export default function UserRoutes(app) {
                 req.body.password
             );
             if (!userDoc) {
-                return res.status(401).json({ message: "Unable to login. Try again." });
+                return res
+                    .status(401)
+                    .json({ message: "Unable to login. Try again." });
             }
             const user = userDoc.toObject({ versionKey: false });
+            user._id = userDoc._id.toString();
             req.session.currentUser = user;
-            res.json(user);
+            req.session.save(err => {
+                if (err) return res.status(500).json({ message: err.message });
+                res.json(user);
+            });
         } catch (err) {
             res.status(500).json({ message: err.message });
         }
@@ -52,6 +64,7 @@ export default function UserRoutes(app) {
             await dao.updateUser(current._id, req.body);
             const updatedDoc = await dao.findUserById(current._id);
             const updated = updatedDoc.toObject({ versionKey: false });
+            updated._id = updatedDoc._id.toString();
             req.session.currentUser = updated;
             res.json(updated);
         } catch (err) {
