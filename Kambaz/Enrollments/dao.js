@@ -21,12 +21,14 @@ export function enrollUserInCourse(userId, courseId) {
         user: new mongoose.Types.ObjectId(userId),
         course: new mongoose.Types.ObjectId(courseId),
     };
+    console.log("Enrolling user:", newEnrollment.user, "in course:", newEnrollment.course);
     return model.create(newEnrollment);
 }
 
 
 
 export function unenrollUserFromCourse(userId, courseId) {
+    console.log("Unenrolling user:", userId, "from course:", courseId);
     return model.deleteOne({
         user: new mongoose.Types.ObjectId(userId),
         course: new mongoose.Types.ObjectId(courseId),
