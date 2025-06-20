@@ -1,11 +1,16 @@
-// Kambaz/Modules/schema.js.js
+// src/Kambaz/Modules/schema.js
+
 import mongoose from "mongoose";
 
 const moduleSchema = new mongoose.Schema(
     {
         name: { type: String, required: true },
         description: String,
-        course: { type: String, ref: "Course" },
+        course: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Course",
+            required: true
+        },
     },
     { collection: "modules" }
 );

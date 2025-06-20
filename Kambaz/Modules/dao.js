@@ -1,9 +1,12 @@
 // Kambaz/Modules/dao.js
+import mongoose from "mongoose";
 import ModuleModel from "./model.js";
 
-export async function findModulesForCourse(courseId) {
-    return await ModuleModel.find({ course: courseId });
-}
+export const findModulesForCourse = async (courseId) => {
+    return ModuleModel.find({
+        course: new mongoose.Types.ObjectId(courseId),
+    }).exec();
+};
 
 export async function createModule(module) {
     return await ModuleModel.create(module);
