@@ -12,8 +12,14 @@ export async function findCoursesForUser(userId) {
 }
 
 export async function findUsersForCourse(courseId) {
-    const enrollments = await model.find({ course: courseId }).populate("user");
-    return enrollments.map((e) => e.user);
+    try {
+        const courseObjId = new mongoose.Types.ObjectId(courseId);
+        const enrollments = await model.find({ course: courseObjId }).populate("user");
+        return enrollments.map((e) => e.user);
+    } catch (err) {
+        console.error("findUsersForCourse error:", err);
+        return [];
+    }
 }
 
 export function enrollUserInCourse(userId, courseId) {
