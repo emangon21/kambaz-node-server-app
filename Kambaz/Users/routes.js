@@ -5,32 +5,6 @@ import * as enrollmentsDao from "../Enrollments/dao.js";
 
 export default function UserRoutes(app) {
     // Sign up
-    app.post("/api/users/signup", async (req, res) => {
-        try {
-            const existing = await dao.findUserByUsername(req.body.username);
-            if (existing) {
-                return res.status(400).json({ message: "Username already taken" });
-            }
-
-            const newUserDoc = await dao.createUser(req.body);
-            const newUser = newUserDoc.toObject({ versionKey: false });
-            newUser._id = newUserDoc._id.toString();
-            req.session.currentUser = newUser;
-            req.session.save(err => {
-                if (err) {
-                    console.error("Session save error:", err);
-                    return res.status(500).json({ message: err.message });
-                }
-                res.json(newUser);
-            });
-
-        } catch (err) {
-            res.status(500).json({ message: err.message });
-        }
-    });
-
-
-    // Replace your entire “Sign in” handler with this:
     app.post("/api/users/signin", async (req, res) => {
         try {
             const userDoc = await dao.findUserByCredentials(
@@ -43,6 +17,7 @@ export default function UserRoutes(app) {
 
             const user = userDoc.toObject({ versionKey: false });
             user._id = userDoc._id.toString();
+
             req.session.currentUser = user;
             req.session.save(err => {
                 if (err) {
@@ -58,7 +33,6 @@ export default function UserRoutes(app) {
     });
 
 
-
     // Fetch current session user
     app.post("/api/users/profile", (req, res) => {
         const current = req.session.currentUser;
@@ -66,7 +40,7 @@ export default function UserRoutes(app) {
         res.json(current);
     });
 
-    // Replace your entire “Update current session user” handler with this:
+    // UPDATE PROFILE
     app.put("/api/users/profile", async (req, res) => {
         const current = req.session.currentUser;
         if (!current?._id) {
@@ -76,7 +50,6 @@ export default function UserRoutes(app) {
         try {
             await dao.updateUser(current._id, req.body);
             const updatedDoc = await dao.findUserById(current._id);
-
             const updated = updatedDoc.toObject({ versionKey: false });
             updated._id = updatedDoc._id.toString();
             req.session.currentUser = updated;
