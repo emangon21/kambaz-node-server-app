@@ -1,5 +1,6 @@
 // Kambaz/Enrollments/dao.js
 import model from "./model.js";
+import mongoose from "mongoose";
 
 export async function findAllEnrollments() {
     return model.find().lean().exec();
