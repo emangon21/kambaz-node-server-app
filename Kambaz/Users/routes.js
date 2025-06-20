@@ -56,7 +56,7 @@ export default function UserRoutes(app) {
 
 
     // Fetch current session user
-    app.post("/api/users/profile", (req, res) => {
+    app.get("/api/users/profile", (req, res) => {
         const current = req.session.currentUser;
         if (!current) return res.sendStatus(401);
         res.json(current);
