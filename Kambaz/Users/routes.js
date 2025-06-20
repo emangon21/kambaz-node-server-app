@@ -1,34 +1,25 @@
 // File: Kambaz/Users/routes.js
-
 import * as dao from "./dao.js";
 import * as enrollmentsDao from "../Enrollments/dao.js";
 
 export default function UserRoutes(app) {
-    // Sign Up
+    // Sign up
     app.post("/api/users/signup", async (req, res) => {
         try {
             const existing = await dao.findUserByUsername(req.body.username);
             if (existing) {
                 return res.status(400).json({ message: "Username already taken" });
             }
-
             const newUserDoc = await dao.createUser(req.body);
             const newUser = newUserDoc.toObject({ versionKey: false });
-
             req.session.currentUser = newUser;
-
-            req.session.save((err) => {
-                if (err) {
-                    console.error("Session save failed:", err);
-                    return res.status(500).json({ message: err.message });
-                }
-                res.json(newUser);
-            });
+            res.json(newUser);
         } catch (err) {
             res.status(500).json({ message: err.message });
         }
     });
 
+    // Sign in
     app.post("/api/users/signin", async (req, res) => {
         try {
             const userDoc = await dao.findUserByCredentials(
@@ -36,28 +27,17 @@ export default function UserRoutes(app) {
                 req.body.password
             );
             if (!userDoc) {
-                return res
-                    .status(401)
-                    .json({ message: "Invalid username or password" });
+                return res.status(401).json({ message: "Unable to login. Try again." });
             }
-
             const user = userDoc.toObject({ versionKey: false });
-            user._id = userDoc._id.toString();
             req.session.currentUser = user;
-
-            req.session.save((err) => {
-                if (err) {
-                    console.error("Session save failed:", err);
-                    return res.status(500).json({ message: err.message });
-                }
-                res.json(user);
-            });
+            res.json(user);
         } catch (err) {
             res.status(500).json({ message: err.message });
         }
     });
 
-    // Fetch current session user
+    // Profile (current session user)
     app.post("/api/users/profile", (req, res) => {
         const current = req.session.currentUser;
         if (!current) return res.sendStatus(401);
@@ -68,14 +48,10 @@ export default function UserRoutes(app) {
     app.put("/api/users/profile", async (req, res) => {
         const current = req.session.currentUser;
         if (!current?._id) return res.sendStatus(401);
-
         try {
             await dao.updateUser(current._id, req.body);
             const updatedDoc = await dao.findUserById(current._id);
             const updated = updatedDoc.toObject({ versionKey: false });
-            updated._id = updatedDoc._id.toString();
-
-            // update session
             req.session.currentUser = updated;
             res.json(updated);
         } catch (err) {
