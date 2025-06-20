@@ -16,10 +16,19 @@ export async function findUsersForCourse(courseId) {
 }
 
 export function enrollUserInCourse(userId, courseId) {
-    const newEnrollment = { _id: `${userId}-${courseId}`, user: userId, course: courseId };
+    const newEnrollment = {
+        _id: `${userId}-${courseId}`,
+        user: new mongoose.Types.ObjectId(userId),
+        course: new mongoose.Types.ObjectId(courseId),
+    };
     return model.create(newEnrollment);
 }
 
+
+
 export function unenrollUserFromCourse(userId, courseId) {
-    return model.deleteOne({ user: userId, course: courseId });
+    return model.deleteOne({
+        user: new mongoose.Types.ObjectId(userId),
+        course: new mongoose.Types.ObjectId(courseId),
+    });
 }

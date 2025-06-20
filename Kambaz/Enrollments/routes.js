@@ -24,8 +24,8 @@ export default function EnrollmentRoutes(app) {
         }
     });
 
-    // DELETE to unenroll
     app.delete("/api/enrollments", async (req, res) => {
+        console.log("DELETE /api/enrollments BODY:", req.body);  // <--- Add this!
         const { userId, courseId } = req.body;
         try {
             await dao.unenrollUserFromCourse(userId, courseId);
@@ -34,4 +34,5 @@ export default function EnrollmentRoutes(app) {
             res.status(500).json({ message: err.message });
         }
     });
+
 }
