@@ -13,13 +13,10 @@ export default function UserRoutes(app) {
             }
 
             const newUserDoc = await dao.createUser(req.body);
-            // convert to plain object and preserve _id
             const newUser = newUserDoc.toObject({ versionKey: false });
             newUser._id = newUserDoc._id.toString();
-
-            // store in session and force a save before replying
             req.session.currentUser = newUser;
-            req.session.save((err) => {
+            req.session.save(err => {
                 if (err) {
                     console.error("Session save error:", err);
                     return res.status(500).json({ message: err.message });
@@ -31,7 +28,6 @@ export default function UserRoutes(app) {
         }
     });
 
-    // Sign in
     app.post("/api/users/signin", async (req, res) => {
         try {
             const userDoc = await dao.findUserByCredentials(
@@ -48,7 +44,7 @@ export default function UserRoutes(app) {
 
             // store in session and force a save before replying
             req.session.currentUser = user;
-            req.session.save((err) => {
+            req.session.save(err => {
                 if (err) {
                     console.error("Session save error:", err);
                     return res.status(500).json({ message: err.message });
@@ -59,6 +55,7 @@ export default function UserRoutes(app) {
             res.status(500).json({ message: err.message });
         }
     });
+
 
     // Fetch current session user
     app.post("/api/users/profile", (req, res) => {
@@ -78,7 +75,6 @@ export default function UserRoutes(app) {
             const updated = updatedDoc.toObject({ versionKey: false });
             updated._id = updatedDoc._id.toString();
 
-            // refresh session
             req.session.currentUser = updated;
             res.json(updated);
         } catch (err) {
