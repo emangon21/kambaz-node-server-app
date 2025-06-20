@@ -23,11 +23,14 @@ export default function UserRoutes(app) {
                 }
                 res.json(newUser);
             });
+
         } catch (err) {
             res.status(500).json({ message: err.message });
         }
     });
 
+
+    // Replace your entire “Sign in” handler with this:
     app.post("/api/users/signin", async (req, res) => {
         try {
             const userDoc = await dao.findUserByCredentials(
@@ -38,11 +41,8 @@ export default function UserRoutes(app) {
                 return res.status(401).json({ message: "Invalid credentials" });
             }
 
-            // convert to plain object and preserve _id
             const user = userDoc.toObject({ versionKey: false });
             user._id = userDoc._id.toString();
-
-            // store in session and force a save before replying
             req.session.currentUser = user;
             req.session.save(err => {
                 if (err) {
@@ -51,10 +51,12 @@ export default function UserRoutes(app) {
                 }
                 res.json(user);
             });
+
         } catch (err) {
             res.status(500).json({ message: err.message });
         }
     });
+
 
 
     // Fetch current session user
@@ -64,23 +66,27 @@ export default function UserRoutes(app) {
         res.json(current);
     });
 
-    // Update current session user
+    // Replace your entire “Update current session user” handler with this:
     app.put("/api/users/profile", async (req, res) => {
         const current = req.session.currentUser;
-        if (!current?._id) return res.sendStatus(401);
+        if (!current?._id) {
+            return res.sendStatus(401);
+        }
 
         try {
             await dao.updateUser(current._id, req.body);
             const updatedDoc = await dao.findUserById(current._id);
+
             const updated = updatedDoc.toObject({ versionKey: false });
             updated._id = updatedDoc._id.toString();
-
             req.session.currentUser = updated;
             res.json(updated);
+
         } catch (err) {
             res.status(500).json({ message: err.message });
         }
     });
+
 
 
     // Retrieve all users or filter by role
