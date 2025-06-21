@@ -22,7 +22,7 @@ export async function findAssignmentById(assignmentId) {
 
 export async function createAssignmentForCourse(courseId, assignment) {
     const id = assignment._id || (await getNextId(courseId));
-    const doc = { ...assignment, _id: id, course: courseId };
+    const doc = { ...assignment, _id: id, course: new mongoose.Types.ObjectId(courseId) };
     return model.create(doc);
 }
 
