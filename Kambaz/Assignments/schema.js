@@ -15,7 +15,7 @@ const entryOptionsSchema = new mongoose.Schema(
 const assignmentSchema = new mongoose.Schema(
     {
         _id: String,
-        course: { type: String, ref: "CourseModel", required: true },
+        course: { type: mongoose.Schema.Types.ObjectId, ref: "CourseModel", required: true },
         title: { type: String, required: true },
         description: String,
         points: Number,

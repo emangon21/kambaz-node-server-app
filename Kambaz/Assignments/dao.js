@@ -1,7 +1,7 @@
 // File: Kambaz/Assignments/dao.js
 import model from "./model.js";
+import mongoose from "mongoose";
 
-// Generate a new assignment ID for a course (A101, A102…)
 async function getNextId(courseId) {
     const docs = await model.find({ course: courseId }).select("_id").lean();
     const nums = docs
@@ -12,7 +12,8 @@ async function getNextId(courseId) {
 }
 
 export async function findAssignmentsForCourse(courseId) {
-    return model.find({ course: courseId }).lean();
+    const courseObjId = new mongoose.Types.ObjectId(courseId);
+    return model.find({ course: courseObjId }).lean();
 }
 
 export async function findAssignmentById(assignmentId) {
