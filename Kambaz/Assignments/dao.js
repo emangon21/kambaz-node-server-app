@@ -12,7 +12,7 @@ export async function findAssignmentById(assignmentId) {
 }
 
 export async function createAssignmentForCourse(courseId, assignment) {
-    const id = new mongoose.Types.ObjectId().toHexString();
+    //const id = new mongoose.Types.ObjectId().toHexString();
     const doc = {
         ...assignment,
         _id: id,
